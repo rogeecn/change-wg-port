@@ -23,7 +23,7 @@ var serverCmd = &cobra.Command{
 		router.GET("/", func(c *gin.Context) {
 			port, err := wg.GetPortNumber()
 			if err != nil {
-				c.String(200, err.Error())
+				c.String(500, err.Error())
 				return
 			}
 
@@ -35,12 +35,12 @@ var serverCmd = &cobra.Command{
 		router.POST("/", func(c *gin.Context) {
 			port, err := wg.IncrPortNumber()
 			if err != nil {
-				c.String(200, err.Error())
+				c.String(500, err.Error())
 				return
 			}
 
 			if err := wg.RestartService(); err != nil {
-				c.String(200, err.Error())
+				c.String(500, err.Error())
 				return
 			}
 

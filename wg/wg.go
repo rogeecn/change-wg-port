@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func GetEndPoint() error {
+func GetEndpointPort() error {
 	cmd := "wg show " + config.C.Endpoint + " endpoints"
 	out, err := exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
