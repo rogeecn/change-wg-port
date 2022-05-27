@@ -3,3 +3,4 @@ wg.exe
 *.conf
 !conf/
 .vscode
+wg-port
