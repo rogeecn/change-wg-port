@@ -5,6 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"os"
 	"strconv"
 	"wg/wg"
 
@@ -18,6 +19,13 @@ var serverCmd = &cobra.Command{
 	Short: "automatically modify wg port",
 	Long:  `automatically modify wg port`,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		mode := gin.DebugMode
+		if os.Getenv("GIN_MODE") == "release" {
+			mode = gin.ReleaseMode
+		}
+		gin.SetMode(mode)
+
 		// create gin http server listen on port :8080
 		router := gin.Default()
 		router.GET("/", func(c *gin.Context) {
