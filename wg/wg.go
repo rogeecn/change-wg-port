@@ -19,14 +19,17 @@ func GetEndpointPort() error {
 	cmd := "wg show " + config.C.Endpoint + " endpoints"
 	out, err := exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
+	logrus.Infof("output string : %s", out)
 	output := string(out)
 
 	if len(output) == 0 {
 		return errors.New("no endpoint")
 	}
-	endpointData := strings.Split(output, " ")
+	output = strings.ReplaceAll(output, "\t", "|")
+	logrus.Infof("output after replace: %s", output)
+	endpointData := strings.Split(output, "|")
 	if len(endpointData) != 2 {
 		return errors.New("wrong endpoint info")
 	}
@@ -34,6 +37,17 @@ func GetEndpointPort() error {
 
 	endPointInfo := strings.Split(endpoint, ":")
 
+	logrus.Info("endpoint info: ", endpoint)
+
+	// stop service before request
+	logrus.Info("stop service")
+	cmd = "wg-quick down " + config.C.Endpoint
+	exec.Command("sh", "-c", cmd).Run()
+
+	time.Sleep(time.Second * 2)
+
+	logrus.Info("request service to change endpoint")
+	// request endpoint
 	// make http request with resty to increase port number
 	// and update endpoint info
 	resp, err := resty.New().R().Post("http://" + endPointInfo[0] + ":8080/")
@@ -41,22 +55,18 @@ func GetEndpointPort() error {
 		return err
 	}
 	if resp.StatusCode() != 200 {
-		return errors.New("http request failed")
+		return errors.New("http request failed, " + string(resp.Body()))
 	}
 
 	logrus.Infof("write new port: %s", resp.Body())
 	// replace endpoint info
 	newEndpoint := strings.Replace(endpoint, endPointInfo[1], resp.String(), -1)
-	err = replaceFileData(config.C.Path, []byte(endpoint), []byte(newEndpoint))
+	err = replaceFileData(config.C.Path, append([]byte(endpoint), '\n'), []byte(newEndpoint))
 	if err != nil {
 		return err
 	}
 
 	// restart service with wg-quick down bmh
-	cmd = "wg-quick down " + config.C.Endpoint
-	exec.Command("sh", "-c", cmd).Run()
-
-	time.Sleep(time.Second * 2)
 
 	cmd = "wg-quick up " + config.C.Endpoint
 	exec.Command("sh", "-c", cmd).Run()
