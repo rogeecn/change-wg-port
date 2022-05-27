@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func runCommandWithOutput(cmd string) (output, error) {
+func runCommandWithOutput(cmd string) ([]byte, error) {
 	return exec.Command("sh", "-c", cmd).Output()
 }
 
