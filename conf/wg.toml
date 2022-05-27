@@ -1,4 +1,4 @@
-# path="/etc/wireguard/wg0.conf"
-path="./wg0.conf"
+path="/etc/wireguard/wg0.conf"
+# path="./wg0.conf"
 range=[50000,60000]
 endpoint="bmh"
