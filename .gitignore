@@ -1,3 +1,4 @@
 newwgport.exe
 wg.exe
 *.conf
+.vscode
