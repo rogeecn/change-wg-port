@@ -26,7 +26,7 @@ func runCommand(cmd string) error {
 func GetEndpointPort() error {
 	// make super interface is up
 	runCommand("wg-quick up " + config.C.Endpoint)
-
+	time.Sleep(time.Second * 5)
 	out, err := runCommandWithOutput("wg show " + config.C.Endpoint + " endpoints")
 	if err != nil {
 		return err
@@ -53,8 +53,8 @@ func GetEndpointPort() error {
 	logrus.Info("stop service")
 	runCommand("wg-quick down " + config.C.Endpoint)
 	time.Sleep(time.Second * 2)
-
 	logrus.Info("request service to change endpoint")
+
 	// request endpoint
 	// make http request with resty to increase port number
 	// and update endpoint info
@@ -76,7 +76,14 @@ func GetEndpointPort() error {
 
 	// restart service with wg-quick down bmh
 	logrus.Infof("service up")
-	return runCommand("wg-quick up " + config.C.Endpoint)
+	err = runCommand("systemctl restart wg-quick@" + config.C.Endpoint)
+	if err != nil {
+		return err
+	}
+
+	c, _ := runCommandWithOutput("wg show " + config.C.Endpoint + " endpoints")
+	fmt.Println(string(c))
+	return nil
 }
 
 // getPortNumber get port number from config file, if not found returns error
